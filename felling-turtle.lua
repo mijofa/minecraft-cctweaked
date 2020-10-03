@@ -28,7 +28,7 @@ function go_N_forward(n)
 end
 
 function find_and_select_item(name, min_count)
-    for i = 1, 16 do
+    for i = 16, 1, -1 do
         turtle.select(i)
         item_detail = turtle.getItemDetail()
         if item_detail and item_detail.name == name then
