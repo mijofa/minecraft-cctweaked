@@ -196,14 +196,19 @@ while true do
     os.sleep(1)
     redstone.setOutput("left", false)
 
-    io.write("Off we go!\n")
-    main_action_single()
+    if redstone.getInput("right") then
+        io.write("Off we go!\n")
+        main_action_single()
 
-    io.write("Releasing minecart again, maybe\n")
-    redstone.setOutput("left", true)
-    os.sleep(5)
-    redstone.setOutput("left", false)
+        io.write("Releasing minecart again, maybe\n")
+        redstone.setOutput("left", true)
+        os.sleep(5)
+        redstone.setOutput("left", false)
 
-    io.write("Clearning personally collected inventory, so we have space for the minecart collected inventory\n")
-    clean_inv()
+        io.write("Clearning personally collected inventory, so we have space for the minecart collected inventory\n")
+        clean_inv()
+    else
+        -- 
+        io.write("The tree detector is not detecting anymore. Resetting\n  Perhaps someone fired an arrow at the target block.\n")
+    end
 end
