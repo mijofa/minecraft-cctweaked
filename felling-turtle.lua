@@ -185,6 +185,10 @@ clean_inv()
 
 -- Start
 while true do
+    -- We need to ensure that any hoppers we drive over don't suck saplings out of the turtle itself.
+    -- FIXME: Move all saplings to the last inventory slot just in case this fails?
+    redstone.setOutput("bottom", true)
+
     if not redstone.getInput("right") then
         io.write("Waiting for redstone update")
         repeat
