@@ -4,7 +4,7 @@ local confirm_start = false
 -- FIXME: Scalability is completely untested
 local distance_to_first_darkoak = 2
 local distance_between_darkoak = 6
-local digs_before_turn = 1
+local digs_before_turn = 2
 local turns_before_home = 3
 
 -- Helpful wiki functions
@@ -96,6 +96,11 @@ function main_action_single()
         turtle.turnRight()
         go_N_forward(1)
         turtle.turnLeft()
+    end
+    for z=digs_before_turn, 2, -1 do
+        -- Last run has 1 less tree before returning home.
+        go_N_forward(distance_between_darkoak)
+        cut_and_replant_darkoak()
     end
     -- Returning to home base
     go_N_forward(distance_between_darkoak)
@@ -202,13 +207,12 @@ while true do
 
         io.write("Releasing minecart again, maybe\n")
         redstone.setOutput("left", true)
-        os.sleep(5)
+        os.sleep(15) -- FIXME: blind sleeps are always evil, especially when we're already in a while-true loop
         redstone.setOutput("left", false)
 
         io.write("Clearning personally collected inventory, so we have space for the minecart collected inventory\n")
         clean_inv()
     else
-        -- 
         io.write("The tree detector is not detecting anymore. Resetting\n  Perhaps someone fired an arrow at the target block.\n")
     end
 end
