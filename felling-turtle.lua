@@ -122,7 +122,7 @@ local fuelLimit = turtle.getFuelLimit()
 function clean_inv()
     -- Is actually a slightly modified version of the loop that was in the wiki
     local refuel_needed = turtle.getFuelLevel() < fuelLimit / 4
-    local clear_saplings = false
+    local sapling_stacks_found = 0
     for i = 1, 16 do
         -- for every slot in the inventory, do...
         turtle.select(i)
@@ -149,12 +149,13 @@ function clean_inv()
                 turtle.dropUp() -- If there's anything left in this stack, then the smelter is full
             elseif item_detail.name == "minecraft:dark_oak_sapling" then
                 io.write("Dropping up if already found\n")
-                if clear_saplings then
+                if sapling_stacks_found >= 2 then
                     turtle.dropUp()
                 elseif item_detail.count >= 64 then
                     -- Don't dump this stack, but ensure later found stacks get dumped
-                    clear_saplings = true
+                    sapling_stacks_found = sapling_stacks_found + 1
                 end
+                -- NOTE: This won't dump stacks that are not full, so there might end up being a bunch of half stacks
             else
                 io.write("Dropping up\n")
                 turtle.dropUp()
@@ -166,7 +167,7 @@ end
 function wait_for_inv_topup()
     -- There are more efficient solutions here, but this one seemed the cleanest to read
     -- source: http://www.computercraft.info/forums2/index.php?/topic/27969-how-to-give-an-ospullevent-a-timeout-and-return-nil/
-    local timeout_timer = os.startTimer(5)
+    local timeout_timer = os.startTimer(10)
     while true do
         event, event_info = os.pullEvent()
         if event == "timer" and event_info == timeout_timer then
@@ -175,15 +176,15 @@ function wait_for_inv_topup()
         elseif event == "turtle_inventory" then
             -- Inventory updated again, restart the timer
             io.write(".")
-            timeout_timer = os.startTimer(2)
+            timeout_timer = os.startTimer(10)
         end
     end
 end
 
 -- Setup
 
-if confirm_start then
-    io.write("\n\nNOTE: You should start me with at least 16 darl oak saplings, and a reasonable amount of fuel (or a stack of wood and I'll fuel myself)\n")
+if confirm_start or not find_and_select_item("minecraft:dark_oak_sapling", 32) then
+    io.write("\n\nNOTE: You should start me with at least 32 dark oak saplings, and a reasonable amount of fuel (or a stack of wood and I'll fuel myself)\n")
     io.write("Am I at home position facing the trees to be felled? [y/n] ")
     io.flush()
     resp = io.read()
@@ -214,32 +215,32 @@ while true do
         until redstone.getInput("right")
     end
 
-    io.write("\nClearing inventory before taking off")
-    clean_inv()
-
     io.write("Releasing minecart\n")
     redstone.setOutput("left", true)
-    os.sleep(2)
+    os.sleep(1)
     redstone.setOutput("left", false)
+
+    io.write("\nClearing inventory before taking off")
+    clean_inv()
 
     if redstone.getInput("right") then
         io.write("Off we go!\n")
         main_action_single()
 
-        io.write("Clearning personally collected inventory, so we have space for the minecart collected inventory\n")
+        io.write("Clearing personally collected inventory, so we have space for the minecart collected inventory\n")
         clean_inv()
 
-        io.write("Waiting for minecart to empty before releasing it again\n")
-        -- NOTE: This heavily depends on the fact the minecart gets back within 5 seconds of the turtle getting back
+        io.write("Waiting for hopper/minecart to empty before releasing it\n")
         wait_for_inv_topup()
+
+        -- NOTE: This heavily depends on the fact the minecart gets back at most 10 seconds after the turtle
+        io.write("Releasing minecart again\n")
+        redstone.setOutput("left", true)
+        os.sleep(1)
+        redstone.setOutput("left", false)
 
         io.write("Clearing minecart collected inventory\n")
         clean_inv()
-
-        io.write("Releasing minecart again\n")
-        redstone.setOutput("left", true)
-        os.sleep(15) -- FIXME: blind sleeps are always evil, especially when we're already in a while-true loop
-        redstone.setOutput("left", false)
     else
         io.write("The tree detector is not detecting anymore. Resetting\n  Perhaps someone fired an arrow at the target block.\n")
     end
