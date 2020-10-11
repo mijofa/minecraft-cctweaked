@@ -163,6 +163,23 @@ function clean_inv()
     end
 end
 
+function wait_for_inv_topup()
+    -- There are more efficient solutions here, but this one seemed the cleanest to read
+    -- source: http://www.computercraft.info/forums2/index.php?/topic/27969-how-to-give-an-ospullevent-a-timeout-and-return-nil/
+    local timeout_timer = os.startTimer(5)
+    while true do
+        event, event_info = os.pullEvent()
+        if event == "timer" and event_info == timeout_timer then
+            io.write(" Done\n")
+            break
+        elseif event == "turtle_inventory" then
+            -- Inventory updated again, restart the timer
+            io.write(".")
+            timeout_timer = os.startTimer(2)
+        end
+    end
+end
+
 -- Setup
 
 if confirm_start then
@@ -202,20 +219,27 @@ while true do
 
     io.write("Releasing minecart\n")
     redstone.setOutput("left", true)
-    os.sleep(1)
+    os.sleep(2)
     redstone.setOutput("left", false)
 
     if redstone.getInput("right") then
         io.write("Off we go!\n")
         main_action_single()
 
-        io.write("Releasing minecart again, maybe\n")
+        io.write("Clearning personally collected inventory, so we have space for the minecart collected inventory\n")
+        clean_inv()
+
+        io.write("Waiting for minecart to empty before releasing it again\n")
+        -- NOTE: This heavily depends on the fact the minecart gets back within 5 seconds of the turtle getting back
+        wait_for_inv_topup()
+
+        io.write("Clearing minecart collected inventory\n")
+        clean_inv()
+
+        io.write("Releasing minecart again\n")
         redstone.setOutput("left", true)
         os.sleep(15) -- FIXME: blind sleeps are always evil, especially when we're already in a while-true loop
         redstone.setOutput("left", false)
-
-        io.write("Clearning personally collected inventory, so we have space for the minecart collected inventory\n")
-        clean_inv()
     else
         io.write("The tree detector is not detecting anymore. Resetting\n  Perhaps someone fired an arrow at the target block.\n")
     end
