@@ -220,8 +220,13 @@ while true do
     os.sleep(1)
     redstone.setOutput("left", false)
 
-    io.write("\nClearing inventory before taking off")
+    io.write("Clearing inventory before taking off\n")
     clean_inv()
+
+    if not find_and_select_item("minecraft:dark_oak_sapling", 32) then
+        io.write("Can't find enough saplings\n")
+        error("break here")
+    end
 
     if redstone.getInput("right") then
         io.write("Off we go!\n")
