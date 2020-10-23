@@ -3,6 +3,7 @@
 -- Farming Dark Oak trees
 -- We're already in the starting position
 -- We'll never get reset in the middle of an operation
+-- For each "run" we'll always recieve 1 blaze rod, 16 bone meal, & 4 saplings
 
 function wait_for_inv_topup()
     -- There are more efficient solutions here, but this one seemed the cleanest to read
@@ -70,7 +71,7 @@ function prepare_inv(drop_down)
             elseif item_detail.name == "minecraft:dark_oak_sapling" and item_detail.count >= 4 then
                 print("  saplings")
                 saplings_found = saplings_found + item_detail.count
-            elseif item_detail.name == "minecraft:bone_meal" and item_detail.count >= 32 then
+            elseif item_detail.name == "minecraft:bone_meal" and item_detail.count >= 16 then
                 print("  bone meal")
                 bonemeal_found = bonemeal_found + item_detail.count
             else
@@ -86,7 +87,7 @@ function prepare_inv(drop_down)
     end
     runs_requested = blazerods_found
     saplings_needed = 4 * runs_requested
-    bonemeal_wanted = 32 * runs_requested
+    bonemeal_wanted = 16 * runs_requested
     if saplings_found < saplings_needed then
         error("Not enough saplings found")
     end
@@ -122,8 +123,8 @@ function plant_tree()
 end
 
 function apply_fertilizer()
-    local unused_fertilizer = 32
-    find_and_select_item("minecraft:bone_meal", 32)
+    local unused_fertilizer = 16
+    find_and_select_item("minecraft:bone_meal", 16)
     -- FIXME: These braces are ugly
     while ({turtle.inspect()})[2].name == "minecraft:dark_oak_sapling" do
         turtle.place()
