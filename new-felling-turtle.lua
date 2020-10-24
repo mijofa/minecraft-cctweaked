@@ -8,7 +8,7 @@
 function wait_for_inv_topup()
     -- There are more efficient solutions here, but this one seemed the cleanest to read
     -- source: http://www.computercraft.info/forums2/index.php?/topic/27969-how-to-give-an-ospullevent-a-timeout-and-return-nil/
-    local timeout_timer = os.startTimer(1)
+    local timeout_timer = os.startTimer(2)
     while true do
         event, event_info = os.pullEvent()
         if event == "timer" and event_info == timeout_timer then
@@ -17,7 +17,7 @@ function wait_for_inv_topup()
         elseif event == "turtle_inventory" then
             -- Inventory updated again, restart the timer
             io.write(".")
-            timeout_timer = os.startTimer(1)
+            timeout_timer = os.startTimer(2)
         end
     end
 end
