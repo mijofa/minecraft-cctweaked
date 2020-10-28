@@ -9,15 +9,24 @@ function wait_for_inv_topup()
     -- There are more efficient solutions here, but this one seemed the cleanest to read
     -- source: http://www.computercraft.info/forums2/index.php?/topic/27969-how-to-give-an-ospullevent-a-timeout-and-return-nil/
     local timeout_timer = os.startTimer(2)
+    -- We can only fit enough for 32 "runs" at a time,
+    -- so stop once we've accepted 32 sets of items.
+    -- Start the counter at 1 because we've already accepted 1 set when this function starts
+    local inv_count = 1
     while true do
         event, event_info = os.pullEvent()
         if event == "timer" and event_info == timeout_timer then
-            io.write(" Done\n")
+            io.write(inv_count)
+            io.write(" done\n")
             break
         elseif event == "turtle_inventory" then
             -- Inventory updated again, restart the timer
             io.write(".")
             timeout_timer = os.startTimer(2)
+            inv_count = inv_count + 1
+            if inv_count >= 32 then
+                break
+            end
         end
     end
 end
@@ -92,6 +101,7 @@ function prepare_inv(drop_down)
         error("Not enough saplings found")
     end
     if bonemeal_found < bonemeal_wanted then
+        -- This is only a warning, as we don't always need all the bone meal.
         print("WARNING: Not enough bone meal found")
     end
 
@@ -99,6 +109,7 @@ function prepare_inv(drop_down)
 end
 
 function take_position()
+    turtle.forward()
     turtle.forward()
     turtle.forward()
 end
@@ -176,13 +187,18 @@ while true do
     -- We need to ensure that any hoppers we drive over don't suck items out of the turtle itself.
     redstone.setOutput("bottom", true)
 
+    print("Enabling crafter, waiting for items")
+    -- Enable the crafter when we're ready to accept more items
+    redstone.setOutput("back", true)
     -- This is triggered by a number of items being inserted,
     -- so wait for one inventory update, then wait until they've finished being inserted
-    print("Waiting for items to start")
     os.pullEvent("turtle_inventory")
     print("Recieving items")
     wait_for_inv_topup()
-    -- Pull away so we stop recieving items and have time to process
+
+    -- Disable the crafter
+    redstone.setOutput("back", false)
+    -- Pull away from the crafter for good measure
     turtle.up()
 
     print("Sorting inventory")
@@ -206,9 +222,10 @@ while true do
     end
     print("Cleaning up")
     turtle.back()
+    turtle.back()
 
-    redstone.setOutput("bottom", false)
     print("Dumping leftovers")
+    redstone.setOutput("bottom", false)
     for i = 1, 16, 1 do
         turtle.select(i)
         while turtle.getItemDetail() do turtle.dropDown() end
