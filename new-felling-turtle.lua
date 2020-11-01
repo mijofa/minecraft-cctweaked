@@ -10,7 +10,7 @@ function wait_for_inv_topup()
     -- source: http://www.computercraft.info/forums2/index.php?/topic/27969-how-to-give-an-ospullevent-a-timeout-and-return-nil/
     local timeout_timer = os.startTimer(2)
     -- We can only fit enough for 32 "runs" at a time,
-    -- so stop once we've accepted 32 sets of items.
+    -- so stop once we've accepted 30 sets of items, just in case.
     -- Start the counter at 1 because we've already accepted 1 set when this function starts
     local inv_count = 1
     while true do
@@ -24,7 +24,7 @@ function wait_for_inv_topup()
             io.write(".")
             timeout_timer = os.startTimer(2)
             inv_count = inv_count + 1
-            if inv_count >= 32 then
+            if inv_count >= 30 then
                 break
             end
         end
@@ -98,7 +98,8 @@ function prepare_inv(drop_down)
     saplings_needed = 4 * runs_requested
     bonemeal_wanted = 16 * runs_requested
     if saplings_found < saplings_needed then
-        error("Not enough saplings found")
+        -- Not an error until we actually try to plant them
+        print("WARNING: Not enough saplings found")
     end
     if bonemeal_found < bonemeal_wanted then
         -- This is only a warning, as we don't always need all the bone meal.
