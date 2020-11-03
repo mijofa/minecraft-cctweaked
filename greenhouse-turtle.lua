@@ -1,6 +1,4 @@
--- rm farming
--- wget https://abrahall.id.au/~mike/turtle.lua farming
--- farming
+-- wget https://abrahall.id.au/~mike/turtle.lua startup
 
 -- Actual number at last calculation = 462 -- 2020-11-02
 -- 480 = 4 blaze rods
@@ -72,16 +70,16 @@ function maybe_harvest(downwards)
         suck = turtle.suck
     end
 
-    any_block, block_info = inspect()
-    if (any_block and harvest_ages[block_info.name]) and (
-        ( block_info.state and block_info.state.age and block_info.state.age >= harvest_ages[block_info.name] ) or
-        ( harvest_ages[block_info.name] == true ) ) then
+    any_block, block_detail = inspect()
+    if (any_block and harvest_ages[block_detail.name]) and (
+        ( block_detail.state and block_detail.state.age and block_detail.state.age >= harvest_ages[block_detail.name] ) or
+        ( harvest_ages[block_detail.name] == true ) ) then
             -- Avoid filling inv by selecting seeds before collecting seeds
-            if seeds_harvested[block_info.name] then find_inv_slot(seeds_harvested[block_info.name]) end
+            if seeds_harvested[block_detail.name] then find_inv_slot(seeds_harvested[block_detail.name]) end
             dig()
-            if seeds_harvested[block_info.name] then
+            if seeds_harvested[block_detail.name] then
                 -- Select seeds "again" in case we didn't actually have any before
-                find_inv_slot(seeds_harvested[block_info.name])
+                find_inv_slot(seeds_harvested[block_detail.name])
                 turtle.place()
             end
     end
@@ -453,17 +451,17 @@ function is_mirrored()
     error("No hoes found equipped")
 end
 
-function definitely_at_home()
+function probably_at_home()
     local home_certainty = 0
 
     block, block_detail = turtle.inspect()
     if not block then
         home_certainty = home_certainty + 1
-    elseif block_info.tags["storagedrawers:drawers"] then
+    elseif block_detail.tags["storagedrawers:drawers"] then
         -- We might be home but backwards
         turtle.turnRight()
         turtle.turnRight()
-        if turtle.detect() then
+        if not turtle.detect() then
             home_certainty = home_certainty + 1
         else
             -- Nope, we're lost
@@ -479,13 +477,13 @@ function definitely_at_home()
 
     turtle.turnRight()
     block, block_detail = turtle.inspect()
-    if block and block_info and block_info.tags["storagedrawers:drawers"] then
+    if block and block_detail and block_detail.tags["storagedrawers:drawers"] then
         home_certainty = home_certainty + 1
     end
 
     turtle.turnRight()
     block, block_detail = turtle.inspect()
-    if block and block_info and block_info.tags["minecraft:planks"] then
+    if block and block_detail and block_detail.tags["minecraft:planks"] then
         home_certainty = home_certainty + 1
     end
 
@@ -508,22 +506,23 @@ end
 
 
 while true do
-    if fs.exists("died-mid-run.lock") and not definitely_at_home() then
-        -- We might've been returned after getting stuck,
-        -- so check if we're in a familiar looking home position
-        error("Lockfile exists, therefore I'm lost, aborting.")
+    if fs.exists("died-mid-run.lock") then
+        print("WARNING: Lockfile exists, checking if at home")
+        if probably_at_home() then
+            print("Looks like we're at home, deleting lockfile")
+            fs.delete("died-mid-run.lock")
+        else
+            -- We might've been returned after getting stuck,
+            -- so check if we're in a familiar looking home position
+            error("Definitely not at home, aborting.")
+        end
     end
 
-    block, block_info = turtle.inspect()
-    if block and block_info and block_info.tags["storagedrawers:drawers"] then
-        -- Backwards in our home position, probably been placed manually after getting lost
-        turtle.turnLeft()
-        turtle.turnLeft()
-    end
-    io.write("Waiting 15 level redstone signal: ")
+    print("Waiting for redstone signal of 15: ")
+    io.write("  ")
     repeat
         io.write(redstone.getAnalogInput("top"))
-        io.write(" ")
+        io.write(", ")
         os.pullEvent("redstone")
     until redstone.getAnalogInput("top") == 15
     io.write("\n")
