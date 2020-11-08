@@ -1,10 +1,10 @@
 -- Config options
 -- FIXME: Implement some form of file locking so that when the chunk unloads we know whether we're at home or not
 local confirm_start = false
--- FIXME: Scalability is completely untested
-local distance_to_first_darkoak = 2
+-- FIXME: Scalability is not well tested
+local distance_to_first_darkoak = 5
 local distance_between_darkoak = 6
-local digs_before_turn = 2
+local digs_before_turn = 4
 local turns_before_home = 3
 
 -- Helpful wiki functions
@@ -113,9 +113,11 @@ function main_action_single()
     turtle.turnRight()
     go_N_forward(2)
     turtle.turnLeft()
-    go_N_forward(2)
+    -- Currently where we dig the first tree
+    go_N_forward(distance_to_first_darkoak)
     turtle.turnRight()
     turtle.turnRight()
+    -- Now home, and facing the first tree
 end
 
 local fuelLimit = turtle.getFuelLimit()
