@@ -1,5 +1,3 @@
--- wget https://abrahall.id.au/~mike/turtle.lua startup
-
 -- Actual number at last calculation = 462 -- 2020-11-02
 -- 480 = 4 blaze rods
 fuel_per_run = 480
