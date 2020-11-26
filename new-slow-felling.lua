@@ -395,9 +395,9 @@ function main_loop()
         until redstone.getAnalogInput("right") == 15
         io.write("\n")
 
-        -- Only run once every 3 days
+        -- Only run once every 2 days
         day_of_last_run = tonumber(fs.open("day-of-last-run", 'r').readAll())
-        if os.day() >= day_of_last_run + 3 then
+        if os.day() >= day_of_last_run + 2 then
             fs.open("died-mid-run.lock", 'w')
             main()
             fs.delete("died-mid-run.lock", 'w')
@@ -407,7 +407,7 @@ function main_loop()
             f.flush()
             f.close()
         else
-            print("Waiting at least another day")
+            print("Waiting another day or 2")
         end
     end
 end
