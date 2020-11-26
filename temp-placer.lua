@@ -1,5 +1,5 @@
-num_of_lines = 34
-num_of_rows = 34
+num_of_lines = 48
+num_of_rows = 48
 -- FIXME: Configurable height?
 -- FIXME: Assumes it has enough fuel
 -- FIXME: Doesn't care if inv is full
@@ -38,7 +38,7 @@ for line=1,num_of_lines,1 do
     io.write("Starting line #")
     print(line)
     for row=2,num_of_rows,1 do
-        turtle.back()
+        assert(turtle.back())
         place_next_item()
     end
     -- Turn right on even lines, left on odd ones
@@ -48,7 +48,7 @@ for line=1,num_of_lines,1 do
         else
             turtle.turnLeft()
         end
-        turtle.back()
+        assert(turtle.back())
         place_next_item()
         if (line % 2 == 0) then
             turtle.turnRight()
