@@ -27,9 +27,21 @@ function attack_and_suck_forever()
     until false
 end
 
+function attack_and_suck_for60s()
+    print("Running attack and suck loop 1 minute")
+    start_time = os.clock()
+    repeat
+        turtle.attack()
+        turtle.suck()
+        sleep(0)  -- To ensure any parallel functions get a bit of a turn
+    until os.clock() >= (start_time + 60)
+    print("Finished 1 minute loop")
+end
+
 -- Set the global variables with the command recieved so it can be handled by a parallel function
 sender, message, protocol = nil
 function wait_for_next_command()
+    sender, message, protocol = nil
     sender, message, protocol = rednet.receive("wireless-switch")
     return sender, message, protocol
 end
@@ -41,7 +53,8 @@ function handle_command(message)
     if cmd == "clock" or (cmd == "set" and arg ~= "0") then
         return(attack_and_suck_forever)
     elseif cmd == "set" and arg == "0" then
-        print("Not running anything")
+        print("Running loop for another minute")
+        return(attack_and_suck_for60s)
     else
         print("Unknown command: " .. message)
     end
