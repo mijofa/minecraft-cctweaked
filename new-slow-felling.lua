@@ -245,16 +245,6 @@ function goto_coords(x, y, z)
     print("Going to:", x, y, z)
     print("    From:", start_x, start_y, start_z)
 
-    -- Vertical is easiest, do that first
-    if start_y ~= y then
-        dist_y = y - start_y
-        if dist_y < 0 then
-            go_N_down(dist_y * -1)
-        elseif dist_y > 0 then
-            go_N_up(dist_y)
-        end
-    end
-
     if start_x ~= x then
         dist_x = x - start_x
         if dist_x < 0 then
@@ -275,6 +265,15 @@ function goto_coords(x, y, z)
             turnToDirection("+z")
         end
         go_N_forward(dist_z)
+    end
+
+    if start_y ~= y then
+        dist_y = y - start_y
+        if dist_y < 0 then
+            go_N_down(dist_y * -1)
+        elseif dist_y > 0 then
+            go_N_up(dist_y)
+        end
     end
 
     end_x, end_y, end_z = gps.locate()
@@ -317,10 +316,10 @@ end
 function drop_all_inv()
     -- FIXME: Makes bad assumptions about the current location
     go_N_forward(1)
-    go_N_down(1)
+    turtle.down()  -- Doesn't crash if fails, this is intentional as it might be carpet
 
     inspect_status, block_detail = turtle.inspectDown()
-    assert(inspect_status and block_detail.name == "minecraft:hopper")
+    assert(inspect_status and (block_detail.name == "minecraft:hopper" or block_detail.name == "minecraft:green_carpet"))
     for i = 1, 16, 1 do
         -- Drops *everything*
         turtle.select(i)
@@ -356,10 +355,11 @@ function main()
     end
 
     -- FIXME: Confirm we have enough saplings?
+    turtle.up()  -- Leave the starting bay vertically so we don't run into any redstone or storage contraptions
     for index, sapling_coords in ipairs(sapling_placement_coords) do
         -- WTF are arrays not 0-based?!?!
         x, y, z = sapling_coords[1], sapling_coords[2], sapling_coords[3]
-        y = y+1 -- We want to be 1 above where the sapling is being placed
+        y = y+1  -- We want to be 1 above where the sapling is being placed
         goto_coords(x, y, z)
 
         suckDown_all()
