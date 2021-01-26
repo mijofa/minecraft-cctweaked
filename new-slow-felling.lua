@@ -336,7 +336,7 @@ function need_refuel()
     end
 end
 function do_refuel()
-    -- FIXME: Assumes blaze rods
+    -- FIXME: Assumes blaze rods or dark oak logs
     for i = 1, 16, 1 do
         turtle.select(i)
         item_detail = turtle.getItemDetail()
@@ -349,6 +349,26 @@ end
 
 
 function main()
+    -- Only run if we've been given all required inventory
+    required_saplings = 96
+    required_logs = 64
+    found_saplings = 0
+    found_logs = 0
+    for i = 1, 16, 1 do
+        turtle.select(i)
+        item_detail = turtle.getItemDetail()
+        if item_detail then print(item_detail.name, item_detail.count) end
+        if item_detail and item_detail.name == "minecraft:dark_oak_log" then
+            found_logs = found_logs + item_detail.count
+        elseif item_detail and item_detail.name == "minecraft:dark_oak_sapling" then
+            found_saplings = found_saplings + item_detail.count
+        end
+    end
+    if found_logs < required_logs or found_saplings < required_saplings then
+        print("not enough resources provided, storage system probably isn't ready")
+        return false
+    end
+
     if need_refuel() then
         print("Low on fuel, refueling")
         do_refuel()
@@ -375,6 +395,8 @@ function main()
     drop_all_inv()
     goto_coords(home_coords[1], home_coords[2], home_coords[3])
     turnToDirection(home_direction)
+
+    return true
 end
 
 function main_loop()
@@ -399,13 +421,15 @@ function main_loop()
         day_of_last_run = tonumber(fs.open("day-of-last-run", 'r').readAll())
         if os.day() >= day_of_last_run + 2 then
             fs.open("died-mid-run.lock", 'w')
-            main()
+            ran = main()
             fs.delete("died-mid-run.lock", 'w')
 
-            f = fs.open("day-of-last-run", 'w')
-            f.write(os.day())
-            f.flush()
-            f.close()
+            if ran then
+                f = fs.open("day-of-last-run", 'w')
+                f.write(os.day())
+                f.flush()
+                f.close()
+            end
         else
             print("Waiting another day or 2")
         end
