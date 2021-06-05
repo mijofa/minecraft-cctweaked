@@ -101,8 +101,8 @@ function main()
         end
         assert(move_reason == "Job finished")
 
-        print("Waiting 60s for Pure Daisy to do its thing, and destructors to collect the blocks")
-        sleep(60)  -- The supposed time the Pure Daisy takes to purify things
+        print("Waiting 61s for Pure Daisy to do its thing, and destructors to collect the blocks")
+        sleep(61)  -- The Pure Daisy takes 60s, I've added 1s to account for the destructors
         while turtle.inspectUp() do
             -- Just in case it takes longer
             io.write(".")
