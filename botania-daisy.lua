@@ -85,6 +85,7 @@ function is_inventory_empty()
             return false
         end
     end
+    return true
 end
 
 function main()
