@@ -101,9 +101,9 @@ function placeDown_sapling()
 end
 
 function clear_inv()
-    inspect_status, block_detail = turtle.inspect()
+    inspect_status, block_detail = turtle.inspectDown()
     -- This tag probably needs updating when RS gets involved.
-    assert(inspect_status and block_detail.tags and block_detail.tags['forge:chests'], "Not looking at a chest")
+    assert(inspect_status and block_detail.tags and ( block_detail.tags['forge:chests'] or block_detail.tags['forge:barrels'] ), "Not looking above a chest or barrel")
 
     found_saplings = 0
     for i = 1, 16, 1 do
@@ -112,15 +112,15 @@ function clear_inv()
 
         if item_detail and item_detail.name:match("_sapling$") then
             if found_saplings >= required_saplings then
-                turtle.drop()
+                turtle.dropDown()
             else
                 found_saplings = found_saplings + item_detail.count
             end
         elseif item_detail and ( item_detail.name:match("_log$") or item_detail.name == "minecraft:stick" ) then
             turtle.refuel()
-            turtle.drop()
+            turtle.dropDown()
         else
-            turtle.drop()
+            turtle.dropDown()
         end
     end
 end
