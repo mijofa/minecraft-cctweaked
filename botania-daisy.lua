@@ -80,7 +80,7 @@ function is_inventory_empty()
     for i = 16, 1, -1 do
         turtle.select(i)
         item_count = turtle.getItemCount()
-        if item_count then
+        if item_count > 0 then
             -- We're just checking for non-zero, no point counting everything
             return false
         end
